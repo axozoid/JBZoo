@@ -25,7 +25,8 @@ class JBCartElementCurrencyPrivat extends JBCartElementCurrency
      * Service URL
      * @var string
      */
-    protected $_apiUrl = 'https://privat24.privatbank.ua/p24/accountorder?oper=prp&PUREXML&apicour&country=ua&full';
+    protected $_apiUrl = 'https://api.privatbank.ua/p24api/pubinfo?exchange&coursid=5';
+    // old https://privat24.privatbank.ua/p24/accountorder?oper=prp&PUREXML&apicour&country=ua&full
 
     /**
      * @param null $currency
@@ -45,27 +46,28 @@ class JBCartElementCurrencyPrivat extends JBCartElementCurrency
         if ($xml = simplexml_load_string($xmlString)) {
 
             foreach ($xml as $row) {
-                $row = (array)$row;
-                $row = $row['@attributes'];
-
+               
+                $row = $row->exchangerate;
+                  
                 if (!isset($row['ccy'])) {
                     continue;
                 }
-
-                $unit  = trim($row['unit']) * 100;
-                $value = $this->app->jbvars->money($row['buy']) / $unit;
+               
+                $unit  = 100; // trim($row['unit']) * 100
+                $value = $this->app->jbvars->money($row['buy']);
                 $code  = strtolower(trim($row['ccy']));
-
+                
                 $result[$code] = $value;
             }
-
+        
             $result['rub'] = $result['rur'];
-            $result['uah'] = 100;
+            $result['uah'] = '100';
+        
         }
 
         $result = $this->_normToDefault($result);
-
+       
         return $result;
     }
-
+        
 }
